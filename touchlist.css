@@ -1,0 +1,28 @@
+body{
+  font-family: Helvetica;
+  font-size: 40px;
+  cursor:crosshair;
+  width: 800px;
+  height: 600px;
+  border:10px solid black;
+}
+span.checked{text-decoration: line-through;}
+span.notChecked{color:white}
+input{
+  width:500px;
+  font-size:8px;
+}
+div#title{
+  background:none repeat scroll 0 0 black;
+  color:white;
+  text-align:center;
+}
+li{
+  margin-left:100px;
+}
+button{
+  height: 50px;
+  cursor: crosshair;
+}
+div#controls{
+}

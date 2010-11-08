@@ -1,94 +1,22 @@
 <html manifest='offline.manifest'>
   <head>
-    <style>
-      body{
-        font-family: Helvetica;
-        font-size: 40px;
-        cursor:crosshair;
-        width: 800px;
-        height: 600px;
-        border:10px solid black;
-      }
-      span.checked{text-decoration: line-through;}
-      span.notChecked{color:white}
-      input{
-        width:500px;
-        font-size:8px;
-      }
-      div#title{
-        background:none repeat scroll 0 0 black;
-        color:white;
-        text-align:center;
-      }
-      li{
-        margin-left:100px;
-      }
-      button{
-        height: 50px;
-        cursor: crosshair;
-      }
-      div#controls{
-      }
-    </style>
+    <link href="touchlist.css" rel="stylesheet" type="text/css">
   </head>
   <body>
+  <div id='menu'>
+    <a href='#/select_checklist'>Select Checklist</a>
+    <a href='#/refresh_checklists/0Ago31JQPZxZrdG5qMEFPb2Zzb2ZNbWtRaDBDSUtoZ1E'>Refresh Checklist</a>
+    <a href=''></a>
+  </div>
   <div id='message'></div>
   <div id='title'></div>
+  <table/>
   <ul id='list'></ul>
   <div id='controls'>
-    <input id='checklist_source' type='text'/>
-    <button>Get Checklist</button>
     <button>Finished</button>
   </div>
-
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-  <script type='text/javascript'>
-    var default_url = "http://spreadsheets.google.com/feeds/list/0Ago31JQPZxZrdHF2bWNjcTJFLXJ6UUM5SldEakdEaXc/od6/public/basic?alt=json-in-script";
-    $('input#checklist_source').val(default_url);
-    $("button:contains('Get Checklist')").click( function(){
-      loadJSONData($('input').val());
-    });
-    $("button:contains('Finished')").click( function(){
-      var result = $('span.checked').length + " out of " + $('span.checkItem').length + " checked";
-      submitDataToGoogleForm("http://spreadsheets.google.com/formResponse?key=tU640m3Zj8OROfgGjfHIXHQ",[$('input#checklist_source').val(),result]);
-      $('#message')
-        .html("Thanks! " + result)
-        .fadeOut(3000)
-    });
-
-    function submitDataToGoogleForm(url,data){
-      // iframe is only used to stop us from loading a new page on submit
-      var iframe = "<iframe name='hidden_iframe' id='hidden_iframe' style='display:none;'></iframe>"
-      var form = "<form id='google_form' method='post' action='"+url+"' target='hidden_iframe'>"
-      // each element of data will be added to a new column
-      $.each(data,function(index,value){
-        form += "<input type='hidden' id='"+index+"' name='entry."+index+".single' value='" + value +"'>"
-      });
-      form += "</form>"
-      $('body').append(iframe + form);
-      $('#google_form').submit();
-    }
-
-    function loadJSONData(url){
-      url += "&callback=processSpreadsheet";
-      $('body').append("<script src='" +url+ "'/>")
-    };
-
-    function processSpreadsheet(data){
-      $("ul#list").html(""); // Clear list
-      var spreadsheet = data.feed.entry;
-      $.each(
-        spreadsheet,
-        function(index,value){
-          $("ul#list").append("<div class='clickable'><span class='checkMark notChecked'>&#10003;</span><span class='checkItem'>"+ value.title.$t +"</span></div>")
-        });
-      $("span.checkItem").click(function(event){
-        $(event.target).prev().toggleClass("notChecked");
-        $(event.target).toggleClass("checked");
-      });
-    };
-
-  </script>
-
+  <script type="text/javascript" src="sammy.min.js"></script>
+  <script type="text/javascript" src="touchlist.js"></script>
   </body>
 </html>
