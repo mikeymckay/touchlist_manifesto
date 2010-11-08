@@ -28,7 +28,6 @@ function renderChecklist(checklistKey){
   $("table").html(""); // Clear list
 
   var checklistData = JSON.parse(localStorage["checklist."+checklistKey]);
-  console.log(checklistData);
 
   $.each(checklistData,function(index,checklistItem){
     $("ul#list").append("<div class='clickable'><span class='checkMark notChecked'>&#10003;</span><span class='checklistItem'>"+ checklistItem.text +"</span></div>")
