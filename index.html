@@ -1,6 +1,11 @@
 <html manifest='offline.manifest'>
   <head>
     <link href="touchlist.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript">
+      window.applicationCache.addEventListener('updateready', function(){
+        window.applicationCache.swapCache();
+      }, false);
+    </script>
   </head>
   <body>
     <div id='menu'></div>
@@ -9,5 +14,7 @@
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="sammy.min.js"></script>
     <script type="text/javascript" src="touchlist.js"></script>
+
+
   </body>
 </html>
