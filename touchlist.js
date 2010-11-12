@@ -1,3 +1,5 @@
+var LIST_OF_CHECKLISTS_GOOGLE_SPREADSHEET_KEY = "0Ago31JQPZxZrdG5qMEFPb2Zzb2ZNbWtRaDBDSUtoZ1E";
+
 function submitDataToGoogleForm(url,data){
   // iframe is only used to stop us from loading a new page on submit
   var iframe = "<iframe name='hidden_iframe' id='hidden_iframe' style='display:none;'></iframe>"
@@ -70,7 +72,7 @@ function parseSpreadsheetToJSON(data, callback){
 
 function renderListOfChecklist(listOfChecklists){
   $('#main').html("<table><thead></thead><tbody><tr><th>Name</th><th>Type</th></tr></tbody></table>");
-  $('#menu').html("<a href='#/refresh_checklists/0Ago31JQPZxZrdG5qMEFPb2Zzb2ZNbWtRaDBDSUtoZ1E'>Refresh Checklists</a>");
+  $('#menu').html("<a href='#/refresh_checklists/" + LIST_OF_CHECKLISTS_GOOGLE_SPREADSHEET_KEY+"'>Refresh Checklists</a>");
   $.each(listOfChecklists,function(index,checklist){
     $('table').append("<tr><td><a href='#/checklist/"+getKeyForSpreadsheet(checklist.url)+"'>" + checklist.name + "</a></td><td>" + checklist.type + "</td><td><a href='"+checklist.url+"'>Edit</a></td></tr>")
   });
@@ -101,7 +103,13 @@ var app = $.sammy()
     getJSON(getJSONUrlForSpreadsheetKey(context.params["spreadsheet_key"]), listOfChecklistsCallback);
   })
   .get('#/select_checklist', function(context) {
-    renderListOfChecklist(JSON.parse(localStorage["available_checklists"]))
+    try{
+      var available_checklists = JSON.parse(localStorage["available_checklists"]);
+      if (available_checklists.length == 0) throw "No Checklists Loaded"
+      renderListOfChecklist(available_checklists);
+    } catch (e){
+      context.redirect("#/refresh_checklists/" + LIST_OF_CHECKLISTS_GOOGLE_SPREADSHEET_KEY);
+    }
   })
   .get('#/checklist/:spreadsheet_key', function(context) {
     renderChecklist(context.params["spreadsheet_key"]);
