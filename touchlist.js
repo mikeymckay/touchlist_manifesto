@@ -1,78 +1,7 @@
 DEFAULT_LIST_OF_CHECKLISTS_GOOGLE_SPREADSHEET_KEY = "0Ago31JQPZxZrdG5qMEFPb2Zzb2ZNbWtRaDBDSUtoZ1E";
 
-if (localStorage["list_of_checklists_google_spreadsheet_key"] == null){
-  localStorage["list_of_checklists_google_spreadsheet_key"] = DEFAULT_LIST_OF_CHECKLISTS_GOOGLE_SPREADSHEET_KEY;
-}
-
-function Checklist(data){
-  this.data = data;
-  if (data.source_url){
-    this.key = new GoogleSpreadsheet(data.source_url).key;
-  }
-}
-
-Checklist.createFromGoogleSpreadsheetData = function(googleSpreadsheetData){
-  new Checklist(parseSpreadsheetToJSON(googleSpreadsheetData)).save();
-}
-
-Checklist.findByKey = function(key){
-  checklist = new Checklist(JSON.parse(localStorage["checklist."+key]));
-  checklist.key = key;
-  return checklist;
-}
-
-Checklist.prototype.save = function(){
-  localStorage["checklist."+this.key]=JSON.stringify(this.data);
-}
-
-Checklist.prototype.render = function(){
-  $.each(this.data,function(index,checklistItem){
-    $("ul#list").append("<div class='clickable'><span class='checkMark notChecked'>&#10003;</span><span class='checklistItem'>"+ checklistItem.text +"</span></div>")
-  });
-
-  $("span.checklistItem").click(function(event){
-    $(event.target).prev().toggleClass("notChecked");
-    $(event.target).toggleClass("checked");
-  });
-}
-
-function ListOfChecklists(){
-}
-
-ListOfChecklists.currentList = function(){
-  if (localStorage.available_checklists == null || localStorage.available_checklists == ""){
-    ListOfChecklists.refresh(localStorage.list_of_checklists_google_spreadsheet_key);
-  }
-  return JSON.parse(localStorage.available_checklists);
-}
-
-ListOfChecklists.createFromJSON = function(json){
-  localStorage.available_checklists=JSON.stringify(json);
-}
-
-ListOfChecklists.createFromGoogleSpreadsheetData = function(googleSpreadsheetData){
-  ListOfChecklists.createFromJSON(parseSpreadsheetToJSON(googleSpreadsheetData));
-}
-
-ListOfChecklists.createFromGoogleSpreadsheetDataThenRenderThenUpdate = function(googleSpreadsheetData){
-  ListOfChecklists.createFromGoogleSpreadsheetData(googleSpreadsheetData);
-  ListOfChecklists.render();
-  updateChecklists(ListOfChecklists.currentList());
-}
-
-ListOfChecklists.setKey = function(key){
-  localStorage.list_of_checklists_google_spreadsheet_key = key;
-}
-
-ListOfChecklists.refresh = function(){
-  getJSONcallHandler(new GoogleSpreadsheet(localStorage.list_of_checklists_google_spreadsheet_key).jsonUrl, "ListOfChecklists.createFromGoogleSpreadsheetDataThenRenderThenUpdate");
-}
-
-ListOfChecklists.render = function(){
-  $('#main').html("<table><thead><tr><th>Name</th><th>Type</th></tr></thead><tbody></tbody></table>");
-  $.each(ListOfChecklists.currentList(),function(index,checklist){
-    $('tbody').append("<tr><td><a href='#/checklist/" + new GoogleSpreadsheet(checklist.url).key +"'>" + checklist.name + "</a></td><td>" + checklist.type + "</td><td><a href='"+checklist.url+"'>Edit</a></td></tr>")
-  });
+if (localStorage.list_of_checklists_google_spreadsheet_key == null){
+  localStorage.list_of_checklists_google_spreadsheet_key = DEFAULT_LIST_OF_CHECKLISTS_GOOGLE_SPREADSHEET_KEY;
 }
 
 function GoogleSpreadsheet(urlOrKey){
@@ -106,12 +35,6 @@ function getJSONcallHandler(url,handlerName){
   url += "&callback="+handlerName
   $('body').append("<script src='" +url+ "'/>")
 };
-
-function updateChecklists(available_checklists){
-  $.each(available_checklists, function(index,checklist){
-    getJSONcallHandler(new GoogleSpreadsheet(checklist.url).jsonUrl, "Checklist.createFromGoogleSpreadsheetData");
-  });
-}
 
 // TODO Doesn't handle , and : if it's in the data being retrieved
 function parseSpreadsheetToJSON(data){
@@ -156,8 +79,11 @@ var app = $.sammy()
   })
   .get('#/configure', function(context) {
     $('#menu').html("<a href='#/select_checklist'>Select Checklist</a>");
+    if (localStorage.list_of_checklists_google_spreadsheet_key == null){
+      localStorage.list_of_checklists_google_spreadsheet_key = DEFAULT_LIST_OF_CHECKLISTS_GOOGLE_SPREADSHEET_KEY;
+    }
     $('#main').html("<form action='#/list_of_checklists_key' method='post'>List of checklists google spreadsheet key (default: "+ DEFAULT_LIST_OF_CHECKLISTS_GOOGLE_SPREADSHEET_KEY +")<input name='key' type='text' value='"+ localStorage.list_of_checklists_google_spreadsheet_key +"'></input><input type='submit' value='Update'></input></form>");
-    $('#main').append("<form action='#/configure' method='post'>Add new checklist from google spreadsheet: <input name='new_checklist' type='text'></input><input type='submit' value='Update'></input></form>");
+    $('#main').append("<form action='#/checklist' method='post'>Add new checklist from google spreadsheet: <input name='new_checklist' type='text'></input><input type='submit' value='Update'></input></form>");
     $('#main').append("<a href='#/clear_local_storage'>Clear Local Storage</a>");
   })
   .get('#/clear_local_storage', function(context) {
@@ -166,5 +92,11 @@ var app = $.sammy()
   .post('#/list_of_checklists_key', function(context) {
     ListOfChecklists.setKey(context.params["key"]);
     context.redirect('#/refresh_checklists');
+  })
+  .post('#/new_checklist', function(context) {
+    // TODO
+    // figure out what to pass in (key,url?)
+    // create Checklist
+    // figure out how to add it to the list
   })
   .run('#/');
